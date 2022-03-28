@@ -1,6 +1,6 @@
 import { Vector2 } from "./vector2";
 // import { Body } from "./bodies/body";
-import { Circle, Rectangle, Line } from ".";
+import { Circle, Rectangle, Line, Triangle } from ".";
 
 interface SATResponde {
   pen: any;
@@ -94,12 +94,12 @@ export class Collider {
     if (obj instanceof Circle || obj instanceof Line) {
       return 1;
     }
-    // if (obj instanceof Rectangle) {
-    //   return 2;
-    // }
-    // if (obj instanceof Triangle) {
-    //   return 3;
-    // }
+    if (obj instanceof Rectangle) {
+      return 2;
+    }
+    if (obj instanceof Triangle) {
+      return 3;
+    }
   }
   findAxes(o1, o2) {
     let axes = [];
@@ -143,17 +143,20 @@ export class Collider {
       axes.push(o2.direction.normal());
       axes.push(o2.direction);
     }
-    // if (o1 instanceof Triangle) {
-    //   axes.push(o1.vertex[1].subtr(o1.vertex[0]).normal());
-    //   axes.push(o1.vertex[2].subtr(o1.vertex[1]).normal());
-    //   axes.push(o1.vertex[0].subtr(o1.vertex[2]).normal());
-    // }
+    /*
+      Handle Triangles collision
+    */
+    if (o1 instanceof Triangle) {
+      axes.push(o1.vertex[1].subtr(o1.vertex[0]).normal());
+      axes.push(o1.vertex[2].subtr(o1.vertex[1]).normal());
+      axes.push(o1.vertex[0].subtr(o1.vertex[2]).normal());
+    }
 
-    // if (o2 instanceof Triangle) {
-    //   axes.push(o2.vertex[1].subtr(o2.vertex[0]).normal());
-    //   axes.push(o2.vertex[2].subtr(o2.vertex[1]).normal());
-    //   axes.push(o2.vertex[0].subtr(o2.vertex[2]).normal());
-    // }
+    if (o2 instanceof Triangle) {
+      axes.push(o2.vertex[1].subtr(o2.vertex[0]).normal());
+      axes.push(o2.vertex[2].subtr(o2.vertex[1]).normal());
+      axes.push(o2.vertex[0].subtr(o2.vertex[2]).normal());
+    }
     return axes;
   }
   projShapeOntoAxis(axis, obj) {

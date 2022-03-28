@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Physics Browser test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mainloop.js@latest/build/mainloop.min.js"></script>
+    <script src="index.js"></script>
+  </head>
+  <body class="h-screen flex items-center justify-center bg-gray-800">
+    <canvas width="640" height="480" tabindex="0" class="border outline-none" />
+
+    <script>
+      const { Vector2, World, userInput, Wall, Ball, Pyramid } = Physics;
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+      const width = 640;
+      const height = 480;
+      const world = new World();
+      canvas.focus();
+
+      world.add("lineT", new Wall(0, 0, width, 0));
+      world.add("lineL", new Wall(0, 0, 0, height));
+      world.add("lineB", new Wall(width, height, width, 0));
+      world.add("lineR", new Wall(0, height, width, height));
+
+      world.add("ball", new Ball(320, 200, 15, 3));
+      world
+        .get("ball")
+        .set("maxSpeed", 10)
+        .set("color", "red")
+        .set("friction", 1 / 100);
+
+      world.add("ball2", new Ball(280, 200, 15, 3));
+      world
+        .get("ball2")
+        .set("maxSpeed", 10)
+        .set("color", "green")
+        .set("friction", 1 / 100);
+
+      world.add("tri", new Pyramid(100, 340, 40, 3));
+      world.get("tri").set("color", "yellow");
+
+      world.add("tri2", new Pyramid(100, 340, 40, 3));
+      world.get("tri2").set("color", "cyan");
+
+      userInput(world.get("ball").body, canvas);
+      userInput(world.get("ball2").body, canvas, {
+        left: "KeyA",
+        up: "KeyW",
+        right: "KeyD",
+        down: "KeyS",
+        action: "Space",
+      });
+
+      const mouse = new Vector2();
+      world.add("mouse", new Ball(0, 0, 5, 3));
+
+      canvas.addEventListener("mousemove", (ev) => {
+        mouse.set(ev.offsetX, ev.offsetY);
+      });
+
+      world.beforeCollision = function (timestamp) {
+        this.collisions.forEach((colli) => {
+          if (colli.o1 == world.get("ball2").body) {
+            // console.log(colli);
+          }
+          if (colli.o2 == world.get("ball2").body) {
+            // console.log(colli);
+          }
+        });
+      };
+
+      const loop = (delta) => {
+        world.update(ctx, canvas);
+        ctx.fillStyle = "white";
+        ctx.fillText(`Mouse ${mouse.x} ${mouse.y}`, 10, 50);
+
+        let vel = mouse.subtr(world.get("mouse").body.position);
+        world.get("mouse").body.setPosition(mouse.x, mouse.y);
+        //
+        if (world.collider.collide(world.get("ball").body, world.get("mouse").body)) {
+          console.log(vel);
+          world.get("ball").body.velocity.set(vel.x, vel.y);
+        }
+        // console.log(world.collider.collide(world.get("ball").body, world.get("ball2").body));
+      };
+      MainLoop.setUpdate(loop)
+        //.setMaxAllowedFPS(12)
+        .start();
+    </script>
+  </body>
+</html>

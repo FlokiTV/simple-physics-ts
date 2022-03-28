@@ -33,6 +33,8 @@ export class World {
   objects: any = [];
   collisions: any = [];
   collider: Collider;
+  beforeUpdate: any;
+  beforeCollision: any;
   constructor() {
     this.collider = new Collider();
   }
@@ -41,6 +43,7 @@ export class World {
       Update
     */
     this.collisions = []; //reset collisions
+    if (typeof this.beforeUpdate == "function") this.beforeUpdate();
     this.objects.forEach((obj) => {
       if (obj.body.keyControl) obj.body.keyControl();
       if (obj.body.update) obj.body.update();
@@ -64,6 +67,7 @@ export class World {
         }
       }
     });
+    if (typeof this.beforeCollision == "function") this.beforeCollision();
     this.collisions.forEach((c) => {
       c.penRes();
       c.collRes();
@@ -100,3 +104,10 @@ export class World {
     return this.objects[id];
   }
 }
+
+declare global {
+  interface Window {
+    Physics: any;
+  }
+}
+if (typeof window != "undefined") window.Physics = this;
